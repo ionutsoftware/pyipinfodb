@@ -1,58 +1,60 @@
 import requests
-import json
-class IpInfoDb:
-    """Class IPInfoDB, developed by Ionut Software on June 18, 2023.
- This class includes various functions that allow you to use the IP2 Geolocation API (IPInfoDB's API) more easily. Warning! The author is not responsible for any misuse you may give to this tool. The tool is made solely for educational purposes."""
-    def __init__(self, api_key):
-        self.api_key = api_key
-        self.base_url = "https://api.ip2location.io/"
+import logging
 
-    def get_info(self, ip_address):
-        url = f"{self.base_url}?key={self.api_key}&ip={ip_address}&format=json"
-        response = requests.get(url)
-        if response.status_code == 200:
-            response_json = response.json()
-            return response_json
-        else:
+# Constants for the API
+BASE_URL = "https://api.ip2location.io/"
+FORMAT = "json"
+
+# Set up basic logging
+logging.basicConfig(level=logging.INFO)
+
+class IpInfoDb:
+    """
+    A wrapper class for the IPInfoDB API that provides methods to retrieve geolocation data.
+    """
+
+    def __init__(self, api_key):
+        # Initialize the API key and a session for persistent connections
+        self.session = requests.Session()
+        self.session.headers.update({'api_key': api_key})
+    
+    def _get_response(self, ip_address):
+        """
+        Private method to get the response from the API for a given IP address.
+        """
+        # Parameters passed as a dictionary for better readability and maintenance
+        params = {
+            'key': self.session.headers['api_key'],
+            'ip': ip_address,
+            'format': FORMAT
+        }
+        try:
+            # Use the session to make the request
+            response = self.session.get(BASE_URL, params=params)
+            response.raise_for_status()  # Raise an HTTPError if the HTTP request returned an unsuccessful status code
+            return response.json()  # Return the JSON response
+        except requests.RequestException as e:
+            # Log any request-related issues
+            logging.error(f"Request failed: {e}")
             return None
 
+    def get_info(self, ip_address):
+        """
+        Public method to get all geolocation information for a given IP address.
+        """
+        return self._get_response(ip_address)
+
+    def get_field(self, response, field_name):
+        """
+        Generic method to extract a field from the response.
+        """
+        return response.get(field_name)  # Using .get() to avoid KeyError if the field is not present
+
+    # Examples of specific field retrieval methods using the generic get_field method
     def get_country_code(self, response):
-        country_code = response["country_code"]
-        return country_code
+        return self.get_field(response, "country_code")
 
     def get_country(self, response):
-        country = response["country_name"]
-        return country
+        return self.get_field(response, "country_name")
 
-    def get_region_name(self, response):
-        region_name = response["region_name"]
-        return region_name
-
-    def get_city_name(self, response):
-        city_name = response["city_name"]
-        return city_name
-
-    def get_latitude(self, response):
-        latitude = response["latitude"]
-        return latitude
-
-    def get_longitude(self, response):
-        longitude = response["longitude"]
-        return longitude
-
-    def get_zipcode(self, response):
-        zipcode = response["zip_code"]
-        return zipcode
-
-    def get_timezone(self, response):
-        timezone = response["time_zone"]
-        return timezone
-
-    def get_asn(self, response):
-        asn = response["asn"]
-        return asn
-
-    def get_as(self, response):
-        as_value = response["as"]
-        return as_value
-
+    
