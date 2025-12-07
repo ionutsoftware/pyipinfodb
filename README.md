@@ -1,7 +1,5 @@
 # IP Info DB Class
 
-**Nota:** este readme está en inglés. si no entiendes el inglés, puedes acceder al readme en español descargándolo desde [aquí](http://ionutSoftware.ddns.net/pyipinfodb/readme(sp).md)
-
 The **IpInfoDb** class simplifies geolocation tasks based on IP addresses. I developed this class one day during a trip when I was feeling particularly bored. Its functionality is straightforward and becomes evident when you explore the code. Once you provide the IP and your API key to the API, you can utilize the functions to retrieve all the necessary data effortlessly.
 
 ## Prerequisites
